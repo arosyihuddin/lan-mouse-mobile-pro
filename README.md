@@ -41,12 +41,7 @@ Download the app from the [Releases](https://github.com/arosyihuddin/lan-mouse-m
 4. The first time it connects, compare the certificate fingerprint shown on the desktop with the one in the app, then authorize it.
 5. Move the desktop pointer across the screen edge toward the device.
 
-**Clipboard (optional):** on the PC, install and enable the helper once (the unit file lives in `tools/`; systemd looks for it in `~/.config/systemd/user/`):
-
-```sh
-cp tools/lan-mouse-clipboard.service ~/.config/systemd/user/
-systemctl --user enable --now lan-mouse-clipboard.service
-```
+**Clipboard (optional):** on the PC, install and enable the helper once from the project root with `make clipboard-install` (it copies `tools/lan-mouse-clipboard.service` into `~/.config/systemd/user/` and enables the service; `make clipboard-uninstall` removes it again, `make clipboard-status` shows its state).
 
 It watches the PC clipboard with `wl-paste` and applies text from the phone with `wl-copy`.
 
