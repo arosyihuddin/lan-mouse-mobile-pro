@@ -32,17 +32,10 @@ release:
 	@echo "APK: build/app/outputs/flutter-apk/app-release.apk"
 
 clipboard-install:
-	mkdir -p $(UNIT_DIR)
-	cp tools/lan-mouse-clipboard.service $(UNIT_DIR)/$(SERVICE)
-	systemctl --user daemon-reload
-	systemctl --user enable --now $(SERVICE)
-	@echo "Clipboard helper enabled."
+	sh tools/install-clipboard-helper.sh
 
 clipboard-uninstall:
-	-systemctl --user disable --now $(SERVICE)
-	rm -f $(UNIT_DIR)/$(SERVICE)
-	systemctl --user daemon-reload
-	@echo "Clipboard helper removed."
+	sh tools/install-clipboard-helper.sh uninstall
 
 clipboard-start:
 	systemctl --user start $(SERVICE)
