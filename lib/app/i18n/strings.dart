@@ -81,6 +81,8 @@ const Map<String, String> enStrings = {
           'through the screen edge. Move the cursor back to the edge '
           'facing the PC to return.',
   'startListening': 'Start Listening',
+  'a11yRequired': 'Accessibility Service is not active - enable it first so the desktop cursor can appear on this device.',
+  'openSettings': 'Open Settings',
   'stopListening': 'Stop Listening',
   'thisDevice': 'This Device',
   'copiedToClipboard': '{label} copied to clipboard',
@@ -143,6 +145,8 @@ const Map<String, String> idStrings = {
           'lewat tepi layar. Geser kursor kembali ke tepi yang menghadap '
           'PC untuk pulang.',
   'startListening': 'Mulai Mendengarkan',
+  'a11yRequired': 'Layanan Aksesibilitas belum aktif - aktifkan dulu supaya kursor dari desktop bisa tampil di perangkat ini.',
+  'openSettings': 'Buka Pengaturan',
   'stopListening': 'Berhenti Mendengarkan',
   'thisDevice': 'Perangkat Ini',
   'copiedToClipboard': '{label} tersalin ke clipboard',

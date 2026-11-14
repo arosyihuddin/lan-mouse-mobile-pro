@@ -101,9 +101,33 @@ class _ClientModeViewState extends State<ClientModeView>
     if (_client.isListening) {
       await _client.stop();
     } else {
+      // The pointer lives in the accessibility service: without
+      // it a listening session would accept the desktop's frames
+      // but show nothing. Refuse to start and say why.
+      final a11y = await _input.isAccessibilityEnabled();
+      if (!mounted) return;
+      setState(() => _a11yEnabled = a11y);
+      if (!a11y) {
+        _showA11yRequired();
+        return;
+      }
       await _client.start(onError: _showError);
     }
     if (mounted) setState(() => _status = _client.status);
+  }
+
+  void _showA11yRequired() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(tr('a11yRequired')),
+        action: SnackBarAction(
+          label: tr('openSettings'),
+          onPressed: () => _input.openAccessibilitySettings(),
+        ),
+        duration: const Duration(seconds: 6),
+      ),
+    );
   }
 
   String get _statusText => switch (_status) {

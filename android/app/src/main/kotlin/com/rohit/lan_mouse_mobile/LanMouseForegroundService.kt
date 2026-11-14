@@ -93,7 +93,7 @@ class LanMouseForegroundService : Service() {
                     "Listening - the desktop can control this device"
                 },
             )
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(openIntent)
             .setOngoing(true)
             .addAction(
