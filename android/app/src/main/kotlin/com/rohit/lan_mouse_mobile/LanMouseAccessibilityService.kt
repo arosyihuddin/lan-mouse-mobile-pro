@@ -5,6 +5,8 @@ import android.accessibilityservice.GestureDescription
 import android.graphics.Path
 import android.graphics.PixelFormat
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.view.Choreographer
 import android.view.Gravity
@@ -40,6 +42,7 @@ class LanMouseAccessibilityService : AccessibilityService() {
         private const val TAP_MS = 60L
         private const val LONG_PRESS_MS = 550L
         private const val DRAG_SEGMENT_MS = 25L
+        private const val HOLD_HEARTBEAT_MS = 200L
         private const val SCROLL_MIN_SWIPE_PX = 120f
         private const val SCROLL_MAX_SWIPE_PX = 480f
         private const val SCROLL_PX_PER_UNIT = 6.0
@@ -67,6 +70,27 @@ class LanMouseAccessibilityService : AccessibilityService() {
     private var dragStroke: GestureDescription.StrokeDescription? = null
     private var lastStrokeX = 0f
     private var lastStrokeY = 0f
+
+    private val holdHandler = Handler(Looper.getMainLooper())
+
+    // While the button is held without moving, re-issue a
+    // zero-move continuation every HOLD_HEARTBEAT_MS so the
+    // system keeps the touch down indefinitely - this is what
+    // turns a stationary hold into a real long-press (e.g. a
+    // launcher icon waiting to be picked up).
+    private val holdHeartbeat = object : Runnable {
+        override fun run() {
+            val stroke = dragStroke
+            if (!leftDown || stroke == null) return
+            val path = Path().apply { moveTo(lastStrokeX, lastStrokeY) }
+            val next = stroke.continueStroke(path, 0, DRAG_SEGMENT_MS, true)
+            dispatchGesture(
+                GestureDescription.Builder().addStroke(next).build(), null, null,
+            )
+            dragStroke = next
+            holdHandler.postDelayed(this, HOLD_HEARTBEAT_MS)
+        }
+    }
 
     private var scrollAccumXPx = 0.0
     private var scrollAccumYPx = 0.0
@@ -317,6 +341,25 @@ class LanMouseAccessibilityService : AccessibilityService() {
         downY = cursorY
         downAt = SystemClock.uptimeMillis()
         dragStroke = null
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        // Put the touch down NOW as a continued stroke and keep it
+        // down until release. The old model dispatched nothing on
+        // press and reconstructed tap / long-press / swipe at
+        // release time, so a stationary hold never existed on
+        // screen while it was happening - a launcher had nothing
+        // to pick up, and a hold-then-move looked like a swipe.
+        val path = Path().apply { moveTo(cursorX, cursorY) }
+        val stroke = GestureDescription.StrokeDescription(
+            path, 0, DRAG_SEGMENT_MS, true,
+        )
+        dispatchGesture(
+            GestureDescription.Builder().addStroke(stroke).build(), null, null,
+        )
+        dragStroke = stroke
+        lastStrokeX = cursorX
+        lastStrokeY = cursorY
+        holdHandler.removeCallbacks(holdHeartbeat)
+        holdHandler.postDelayed(holdHeartbeat, HOLD_HEARTBEAT_MS)
     }
 
     private fun dragMove() {
@@ -348,6 +391,7 @@ class LanMouseAccessibilityService : AccessibilityService() {
     private fun leftReleased() {
         if (!leftDown) return
         leftDown = false
+        holdHandler.removeCallbacks(holdHeartbeat)
         val stroke = dragStroke
         dragStroke = null
         if (stroke != null) {
@@ -366,6 +410,7 @@ class LanMouseAccessibilityService : AccessibilityService() {
     }
 
     private fun endDrag() {
+        holdHandler.removeCallbacks(holdHeartbeat)
         val stroke = dragStroke
         dragStroke = null
         leftDown = false
