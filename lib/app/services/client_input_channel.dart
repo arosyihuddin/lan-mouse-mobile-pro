@@ -83,13 +83,28 @@ class ClientInputChannel {
   void clipboardStart() => unawaited(_invoke('clipboardStart'));
   void clipboardStop() => unawaited(_invoke('clipboardStop'));
 
+  /// Foreground service: keeps the listening session alive when
+  /// the app leaves the foreground or is swiped from Recents
+  /// (see LanMouseForegroundService on the Android side).
+  void foregroundStart() => unawaited(_invoke('fgStart'));
+  void foregroundStop() => unawaited(_invoke('fgStop'));
+
   /// Registers the handler for requests coming FROM the Android
-  /// side. Currently a single one: 'requestLeave', fired when the
-  /// overlay cursor hits the edge facing the desktop — the desktop
-  /// must be told (protocol Leave) to release its capture.
-  void setLeaveRequestHandler(void Function() handler) {
+  /// side: 'requestLeave', fired when the overlay cursor hits the
+  /// edge facing the desktop — the desktop must be told (protocol
+  /// Leave) to release its capture; and 'requestStopListening',
+  /// fired by the foreground-service notification's Stop action.
+  void setRequestHandlers({
+    required void Function() onLeave,
+    required void Function() onStopListening,
+  }) {
     _channel.setMethodCallHandler((call) async {
-      if (call.method == 'requestLeave') handler();
+      switch (call.method) {
+        case 'requestLeave':
+          onLeave();
+        case 'requestStopListening':
+          onStopListening();
+      }
     });
   }
 

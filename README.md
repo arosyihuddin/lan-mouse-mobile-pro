@@ -20,6 +20,7 @@
 - Typing through a dedicated input method, including **Ctrl/Shift/Alt shortcuts** (Ctrl+A/C/V/X, Ctrl+Backspace, Shift+selection, F1–F12). Modifier state is tracked from the modifier key events themselves, because some compositors deliver empty `KeyboardModifiers` events.
 - The keyboard switches to Lan Mouse automatically when the pointer enters, and stays until changed manually.
 - Return crossing: push the cursor back out through the edge facing the PC.
+- Listening runs as a foreground service (persistent notification with a Stop action), so the session survives the app being swiped from Recents.
 
 **Clipboard sharing (new)**
 - The Lan Mouse protocol has no clipboard messages, so a small PC-side helper (`tools/clipboard_helper.py`, runs as a systemd user service) syncs text clipboards with the app over UDP 4243: copy on the PC → paste on the phone; copy on the phone → move the pointer back → paste on the PC.

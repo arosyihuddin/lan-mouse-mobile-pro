@@ -25,18 +25,26 @@ enum ClientStatus { stopped, listening, connected, active }
 /// Crossing back to the desktop is driven from this side, exactly
 /// like upstream: when the overlay cursor hits the edge facing the
 /// desktop, the Android side asks for a leave (see
-/// [ClientInputChannel.setLeaveRequestHandler]) and this service
+/// [ClientInputChannel.setRequestHandlers]) and this service
 /// sends the protocol Leave that makes the desktop release its
 /// capture.
 class LanMouseClient {
   LanMouseClient._privateConstructor() {
-    input.setLeaveRequestHandler(_leaveToDesktop);
+    input.setRequestHandlers(
+      onLeave: _leaveToDesktop,
+      onStopListening: _stopFromNotification,
+    );
   }
   static final LanMouseClient instance = LanMouseClient._privateConstructor();
 
   static const int defaultPort = 4242;
 
   final ClientInputChannel input = ClientInputChannel();
+
+  /// The foreground-service notification's Stop action lands here.
+  void _stopFromNotification() {
+    stop();
+  }
 
   rust.SenderWrapper? _sender;
   StreamSubscription<Uint8List>? _subscription;
@@ -99,6 +107,7 @@ class LanMouseClient {
     _setStatus(ClientStatus.listening);
     input.acquireLocks();
     input.clipboardStart();
+    input.foregroundStart();
     // Once any desktop session has been seen, the status stays
     // "connected" until listening stops: the desktop holds its
     // session open across crossings, so the status never falls
@@ -108,6 +117,7 @@ class LanMouseClient {
   Future<void> stop() async {
     input.releaseLocks();
     input.clipboardStop();
+    input.foregroundStop();
     // An empty payload is the stop request for the Rust listener.
     await _sender?.send(data: []);
     await _subscription?.cancel();

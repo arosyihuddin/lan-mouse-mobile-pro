@@ -76,6 +76,12 @@ object ClientInputDispatcher {
         channel?.invokeMethod("requestLeave", null)
     }
 
+    /// The foreground service notification's Stop action: asks
+    /// Dart to end the listening session.
+    fun requestStopListening() {
+        channel?.invokeMethod("requestStopListening", null)
+    }
+
     private var wifiLock: WifiManager.WifiLock? = null
     private var wakeLock: PowerManager.WakeLock? = null
 
@@ -124,6 +130,28 @@ object ClientInputDispatcher {
             if (wakeLock?.isHeld == true) wakeLock?.release()
         } catch (e: Exception) {
             // Already released.
+        }
+    }
+
+    /// Android 13+ hides the foreground-service notification
+    /// unless POST_NOTIFICATIONS is granted; the service still
+    /// protects the process without it, but the user should get
+    /// the visible Stop affordance. Asked once per session start;
+    /// the system itself rate-limits repeat prompts.
+    private fun ensureNotificationPermission() {
+        val act = activity ?: return
+        if (android.os.Build.VERSION.SDK_INT < 33) return
+        val granted = androidx.core.content.ContextCompat
+            .checkSelfPermission(
+                act,
+                android.Manifest.permission.POST_NOTIFICATIONS,
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (!granted) {
+            androidx.core.app.ActivityCompat.requestPermissions(
+                act,
+                arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                4243,
+            )
         }
     }
 
@@ -177,6 +205,13 @@ object ClientInputDispatcher {
             "releaseLocks" -> releaseLocks()
             "clipboardStart" -> ClipboardSync.start()
             "clipboardStop" -> ClipboardSync.stop()
+            "fgStart" -> {
+                appContext?.let { LanMouseForegroundService.start(it) }
+                ensureNotificationPermission()
+            }
+            "fgStop" -> appContext?.let {
+                LanMouseForegroundService.stop(it)
+            }
             "isAccessibilityEnabled" -> {
                 result.success(service != null)
                 return

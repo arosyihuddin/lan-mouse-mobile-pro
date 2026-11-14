@@ -10,6 +10,13 @@
          afterwards. Not grantable at install time; enabled once via
          adb (pm grant) for this sideloaded app. -->
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <!-- Foreground service: keeps a listening client-mode session
+         alive when the app leaves the foreground. The connectedDevice
+         type fits a live link to an external device; it is satisfied
+         by the CHANGE_WIFI_STATE permission above. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:label="Lan Mouse Pro"
@@ -55,6 +62,10 @@
                 android:name="android.view.im"
                 android:resource="@xml/lan_mouse_method" />
         </service>
+        <service
+            android:name=".LanMouseForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
         <meta-data android:name="flutterEmbedding" android:value="2" />
     </application>
     <queries>
