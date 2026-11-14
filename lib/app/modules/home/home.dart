@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:lan_mouse_mobile/app/modules/home/widgets/home_connections.dart';
-
-import 'package:lan_mouse_mobile/app/modules/home/widgets/home_general.dart';
+import 'package:lan_mouse_mobile/app/i18n/strings.dart';
+import 'package:lan_mouse_mobile/app/modules/home/widgets/home_client_mode.dart';
+import 'package:lan_mouse_mobile/app/modules/home/widgets/home_remote_mode.dart';
 import 'package:lan_mouse_mobile/app/modules/home/widgets/home_top.dart';
 
 class HomeView extends StatelessWidget {
@@ -12,11 +12,32 @@ class HomeView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Lan Mouse",
+          appName,
           style: Theme.of(context).textTheme.titleMedium,
         ),
         elevation: 0,
         centerTitle: true,
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.language),
+            onSelected: (code) => LocaleController.instance.setLanguage(code),
+            itemBuilder: (context) {
+              final current = LocaleController.instance.locale.languageCode;
+              return [
+                CheckedPopupMenuItem(
+                  value: 'id',
+                  checked: current == 'id',
+                  child: const Text('Bahasa Indonesia'),
+                ),
+                CheckedPopupMenuItem(
+                  value: 'en',
+                  checked: current == 'en',
+                  child: const Text('English'),
+                ),
+              ];
+            },
+          ),
+        ],
       ),
       body: const Padding(
         padding: EdgeInsets.only(left: 20.0, right: 20.0, top: 20),
@@ -26,9 +47,9 @@ class HomeView extends StatelessWidget {
             children: [
               HomeTop(),
               SizedBox(height: 40),
-              HomeGeneral(),
-              SizedBox(height: 40),
-              HomeConnections(),
+              HomeClientMode(),
+              SizedBox(height: 16),
+              HomeRemoteMode(),
             ],
           ),
         ),

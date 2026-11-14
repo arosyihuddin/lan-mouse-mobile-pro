@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lan_mouse_mobile/app/i18n/strings.dart';
 import 'package:lan_mouse_mobile/app/services/lan_mouse_server.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 
@@ -41,10 +42,10 @@ class _HomeGeneralState extends State<HomeGeneral> {
           fingerprint = data;
         });
       } else {
-        showSnackbar("Failed to get fingerprint");
+        showSnackbar(tr('failedFingerprint'));
       }
     } catch (e) {
-      showSnackbar("Failed to get fingerprint: $e");
+      showSnackbar("${tr('failedFingerprint')}: $e");
     }
     _syncHost();
   }
@@ -71,7 +72,7 @@ class _HomeGeneralState extends State<HomeGeneral> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "General",
+              tr('general'),
               style: Theme.of(context).textTheme.titleSmall,
             ),
             IconButton(
@@ -84,78 +85,59 @@ class _HomeGeneralState extends State<HomeGeneral> {
           margin: EdgeInsets.zero,
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  children: [
-                    const Text("port"),
-                    Expanded(
-                      child: TextFormField(
-                        controller: portController,
-                        maxLength: 4,
-                        textAlign: TextAlign.right,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        decoration: const InputDecoration(
-                          hintText: "Port",
-                          border: InputBorder.none,
-                          counterText: "",
-                        ),
-                      ),
-                    )
+              ListTile(
+                leading: const Icon(Icons.numbers),
+                title: Text(tr('port')),
+                subtitle: TextFormField(
+                  controller: portController,
+                  maxLength: 4,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
                   ],
-                ),
-              ),
-              const Divider(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  children: [
-                    const Text("hostname"),
-                    Expanded(
-                      child: TextFormField(
-                        controller: hostnameController,
-                        textAlign: TextAlign.right,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Host",
-                          counterText: "",
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 2),
-                    InkWell(
-                      onTap: () {
-                        Clipboard.setData(
-                          ClipboardData(text: hostnameController.text),
-                        );
-                      },
-                      child: const Icon(Icons.copy),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: ListTile(
-                  minVerticalPadding: 0,
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.fingerprint),
-                  title: const Text("Certificate Fingerprint"),
-                  subtitle: Text(
-                    fingerprint,
-                    style: Theme.of(context).textTheme.bodySmall,
+                  decoration: InputDecoration(
+                    hintText: tr('port'),
+                    border: InputBorder.none,
+                    counterText: "",
+                    isDense: true,
                   ),
-                  onTap: () {
-                    Clipboard.setData(ClipboardData(text: fingerprint));
-                    showSnackbar("Fingerprint copied to clipboard");
-                  },
                 ),
               ),
-              const SizedBox(height: 15),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.wifi),
+                title: Text(tr('hostname')),
+                subtitle: TextFormField(
+                  controller: hostnameController,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: tr('host'),
+                    counterText: "",
+                    isDense: true,
+                  ),
+                ),
+                trailing: const Icon(Icons.copy),
+                onTap: () {
+                  Clipboard.setData(
+                    ClipboardData(text: hostnameController.text),
+                  );
+                  showSnackbar(tr('hostnameCopied'));
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.fingerprint),
+                title: Text(tr('certFingerprint')),
+                subtitle: Text(
+                  fingerprint,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                trailing: const Icon(Icons.copy),
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: fingerprint));
+                  showSnackbar(tr('fingerprintCopied'));
+                },
+              ),
             ],
           ),
         )

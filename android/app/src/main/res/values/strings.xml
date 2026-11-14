@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_mouse_a11y_description">Lets a desktop on the same network move the pointer and tap on this device (Lan Mouse Pro client mode).</string>
+</resources>

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lan_mouse_mobile/app/i18n/strings.dart';
 import 'package:lan_mouse_mobile/app/models/input_event.dart';
 import 'package:lan_mouse_mobile/app/models/pointer_event.dart';
 import 'package:lan_mouse_mobile/app/services/lan_mouse_server.dart';
@@ -110,7 +111,7 @@ class _MousePadState extends State<MousePad> {
                   children: [
                     Text("x$_mouseSensitivity "),
                     Text(
-                      "Sensitivity",
+                      tr('sensitivity'),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],

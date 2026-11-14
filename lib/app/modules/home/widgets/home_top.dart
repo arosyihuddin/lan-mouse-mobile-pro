@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:lan_mouse_mobile/app/i18n/strings.dart';
 
 class HomeTop extends StatelessWidget {
   const HomeTop({super.key});
@@ -15,12 +16,12 @@ class HomeTop extends StatelessWidget {
         ),
         SizedBox(height: 20, width: MediaQuery.sizeOf(context).width),
         Text(
-          "Lan Mouse",
+          appName,
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 10),
         Text(
-          "easily use your mouse and keyboard on multiple computers",
+          tr('tagline'),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyMedium,
         ),

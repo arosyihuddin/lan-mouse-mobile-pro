@@ -4,11 +4,14 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api/lan_mouse_server.dart';
+
 import 'dart:async';
 import 'dart:convert';
+
 import 'frb_generated.dart';
 import 'frb_generated.io.dart'
     if (dart.library.js_interop) 'frb_generated.web.dart';
+
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 /// Main entrypoint of the Rust API
@@ -33,12 +36,8 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 
   /// Initialize flutter_rust_bridge in mock mode.
   /// No libraries for FFI are loaded.
-  static void initMock({
-    required RustLibApi api,
-  }) {
-    instance.initMockImpl(
-      api: api,
-    );
+  static void initMock({required RustLibApi api}) {
+    instance.initMockImpl(api: api);
   }
 
   /// Dispose flutter_rust_bridge
@@ -68,7 +67,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.6.0';
 
   @override
-  int get rustContentHash => -210735610;
+  int get rustContentHash => 1692952646;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -79,16 +78,19 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
-  Future<void> crateApiLanMouseServerSenderWrapperSend(
-      {required SenderWrapper that, required List<int> data});
+  Future<void> crateApiLanMouseServerSenderWrapperSend({
+    required SenderWrapper that,
+    required List<int> data,
+  });
 
-  Stream<Uint8List> crateApiLanMouseServerConnect(
-      {required String basePath,
-      required String ipAddr,
-      required int port,
-      required String targetAddr,
-      required int targetPort,
-      required ReceiverWrapper rx});
+  Stream<Uint8List> crateApiLanMouseServerConnect({
+    required String basePath,
+    required String ipAddr,
+    required int port,
+    required String targetAddr,
+    required int targetPort,
+    required ReceiverWrapper rx,
+  });
 
   Future<(SenderWrapper, ReceiverWrapper)>
       crateApiLanMouseServerCreateU8Channel();
@@ -96,6 +98,12 @@ abstract class RustLibApi extends BaseApi {
   Future<String?> crateApiLanMouseServerGetFingerprint({required String path});
 
   Future<void> crateApiLanMouseServerInitApp();
+
+  Stream<Uint8List> crateApiLanMouseServerListen({
+    required String basePath,
+    required int port,
+    required ReceiverWrapper rx,
+  });
 
   RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_ReceiverWrapper;
@@ -125,25 +133,35 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
-  Future<void> crateApiLanMouseServerSenderWrapperSend(
-      {required SenderWrapper that, required List<int> data}) {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
-            that, serializer);
-        sse_encode_list_prim_u_8_loose(data, serializer);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 1, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_unit,
-        decodeErrorData: null,
+  Future<void> crateApiLanMouseServerSenderWrapperSend({
+    required SenderWrapper that,
+    required List<int> data,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
+            that,
+            serializer,
+          );
+          sse_encode_list_prim_u_8_loose(data, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 1,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiLanMouseServerSenderWrapperSendConstMeta,
+        argValues: [that, data],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiLanMouseServerSenderWrapperSendConstMeta,
-      argValues: [that, data],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiLanMouseServerSenderWrapperSendConstMeta =>
@@ -153,36 +171,47 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Stream<Uint8List> crateApiLanMouseServerConnect(
-      {required String basePath,
-      required String ipAddr,
-      required int port,
-      required String targetAddr,
-      required int targetPort,
-      required ReceiverWrapper rx}) {
+  Stream<Uint8List> crateApiLanMouseServerConnect({
+    required String basePath,
+    required String ipAddr,
+    required int port,
+    required String targetAddr,
+    required int targetPort,
+    required ReceiverWrapper rx,
+  }) {
     final sink = RustStreamSink<Uint8List>();
-    unawaited(handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_String(basePath, serializer);
-        sse_encode_String(ipAddr, serializer);
-        sse_encode_u_16(port, serializer);
-        sse_encode_String(targetAddr, serializer);
-        sse_encode_u_16(targetPort, serializer);
-        sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerReceiverWrapper(
-            rx, serializer);
-        sse_encode_StreamSink_list_prim_u_8_strict_Sse(sink, serializer);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 2, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_unit,
-        decodeErrorData: null,
+    unawaited(
+      handler.executeNormal(
+        NormalTask(
+          callFfi: (port_) {
+            final serializer = SseSerializer(generalizedFrbRustBinding);
+            sse_encode_String(basePath, serializer);
+            sse_encode_String(ipAddr, serializer);
+            sse_encode_u_16(port, serializer);
+            sse_encode_String(targetAddr, serializer);
+            sse_encode_u_16(targetPort, serializer);
+            sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerReceiverWrapper(
+              rx,
+              serializer,
+            );
+            sse_encode_StreamSink_list_prim_u_8_strict_Sse(sink, serializer);
+            pdeCallFfi(
+              generalizedFrbRustBinding,
+              serializer,
+              funcId: 2,
+              port: port_,
+            );
+          },
+          codec: SseCodec(
+            decodeSuccessData: sse_decode_unit,
+            decodeErrorData: null,
+          ),
+          constMeta: kCrateApiLanMouseServerConnectConstMeta,
+          argValues: [basePath, ipAddr, port, targetAddr, targetPort, rx, sink],
+          apiImpl: this,
+        ),
       ),
-      constMeta: kCrateApiLanMouseServerConnectConstMeta,
-      argValues: [basePath, ipAddr, port, targetAddr, targetPort, rx, sink],
-      apiImpl: this,
-    )));
+    );
     return sink.stream;
   }
 
@@ -196,83 +225,137 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           "targetAddr",
           "targetPort",
           "rx",
-          "sink"
+          "sink",
         ],
       );
 
   @override
   Future<(SenderWrapper, ReceiverWrapper)>
       crateApiLanMouseServerCreateU8Channel() {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 3, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData:
-            sse_decode_record_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_sender_wrapper_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_receiver_wrapper,
-        decodeErrorData: null,
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 3,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_record_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_sender_wrapper_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_receiver_wrapper,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiLanMouseServerCreateU8ChannelConstMeta,
+        argValues: [],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiLanMouseServerCreateU8ChannelConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiLanMouseServerCreateU8ChannelConstMeta =>
-      const TaskConstMeta(
-        debugName: "create_u8_channel",
-        argNames: [],
-      );
+      const TaskConstMeta(debugName: "create_u8_channel", argNames: []);
 
   @override
   Future<String?> crateApiLanMouseServerGetFingerprint({required String path}) {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_String(path, serializer);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 4, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_opt_String,
-        decodeErrorData: null,
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(path, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 4,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_String,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiLanMouseServerGetFingerprintConstMeta,
+        argValues: [path],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiLanMouseServerGetFingerprintConstMeta,
-      argValues: [path],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiLanMouseServerGetFingerprintConstMeta =>
-      const TaskConstMeta(
-        debugName: "get_fingerprint",
-        argNames: ["path"],
-      );
+      const TaskConstMeta(debugName: "get_fingerprint", argNames: ["path"]);
 
   @override
   Future<void> crateApiLanMouseServerInitApp() {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final serializer = SseSerializer(generalizedFrbRustBinding);
-        pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 5, port: port_);
-      },
-      codec: SseCodec(
-        decodeSuccessData: sse_decode_unit,
-        decodeErrorData: null,
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 5,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiLanMouseServerInitAppConstMeta,
+        argValues: [],
+        apiImpl: this,
       ),
-      constMeta: kCrateApiLanMouseServerInitAppConstMeta,
-      argValues: [],
-      apiImpl: this,
-    ));
+    );
   }
 
   TaskConstMeta get kCrateApiLanMouseServerInitAppConstMeta =>
+      const TaskConstMeta(debugName: "init_app", argNames: []);
+
+  @override
+  Stream<Uint8List> crateApiLanMouseServerListen({
+    required String basePath,
+    required int port,
+    required ReceiverWrapper rx,
+  }) {
+    final sink = RustStreamSink<Uint8List>();
+    unawaited(
+      handler.executeNormal(
+        NormalTask(
+          callFfi: (port_) {
+            final serializer = SseSerializer(generalizedFrbRustBinding);
+            sse_encode_String(basePath, serializer);
+            sse_encode_u_16(port, serializer);
+            sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerReceiverWrapper(
+              rx,
+              serializer,
+            );
+            sse_encode_StreamSink_list_prim_u_8_strict_Sse(sink, serializer);
+            pdeCallFfi(
+              generalizedFrbRustBinding,
+              serializer,
+              funcId: 6,
+              port: port_,
+            );
+          },
+          codec: SseCodec(
+            decodeSuccessData: sse_decode_unit,
+            decodeErrorData: null,
+          ),
+          constMeta: kCrateApiLanMouseServerListenConstMeta,
+          argValues: [basePath, port, rx, sink],
+          apiImpl: this,
+        ),
+      ),
+    );
+    return sink.stream;
+  }
+
+  TaskConstMeta get kCrateApiLanMouseServerListenConstMeta =>
       const TaskConstMeta(
-        debugName: "init_app",
-        argNames: [],
+        debugName: "listen",
+        argNames: ["basePath", "port", "rx", "sink"],
       );
 
   RustArcIncrementStrongCountFnType
@@ -300,7 +383,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   ReceiverWrapper
       dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerReceiverWrapper(
-          dynamic raw) {
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return ReceiverWrapperImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
@@ -308,7 +392,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   SenderWrapper
       dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
-          dynamic raw) {
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return SenderWrapperImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
@@ -316,7 +401,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   SenderWrapper
       dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
-          dynamic raw) {
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return SenderWrapperImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
@@ -324,7 +410,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   ReceiverWrapper
       dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerReceiverWrapper(
-          dynamic raw) {
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return ReceiverWrapperImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
@@ -332,14 +419,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   SenderWrapper
       dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
-          dynamic raw) {
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return SenderWrapperImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   RustStreamSink<Uint8List> dco_decode_StreamSink_list_prim_u_8_strict_Sse(
-      dynamic raw) {
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     throw UnimplementedError();
   }
@@ -373,7 +462,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     SenderWrapper,
     ReceiverWrapper
   ) dco_decode_record_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_sender_wrapper_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_receiver_wrapper(
-      dynamic raw) {
+    dynamic raw,
+  ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
     if (arr.length != 2) {
@@ -381,9 +471,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     }
     return (
       dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
-          arr[0]),
+        arr[0],
+      ),
       dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerReceiverWrapper(
-          arr[1]),
+        arr[1],
+      ),
     );
   }
 
@@ -421,51 +513,67 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   ReceiverWrapper
       sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerReceiverWrapper(
-          SseDeserializer deserializer) {
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return ReceiverWrapperImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
   SenderWrapper
       sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
-          SseDeserializer deserializer) {
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return SenderWrapperImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
   SenderWrapper
       sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
-          SseDeserializer deserializer) {
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return SenderWrapperImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
   ReceiverWrapper
       sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerReceiverWrapper(
-          SseDeserializer deserializer) {
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return ReceiverWrapperImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
   SenderWrapper
       sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
-          SseDeserializer deserializer) {
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return SenderWrapperImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
   RustStreamSink<Uint8List> sse_decode_StreamSink_list_prim_u_8_strict_Sse(
-      SseDeserializer deserializer) {
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     throw UnimplementedError('Unreachable ()');
   }
@@ -507,14 +615,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     SenderWrapper,
     ReceiverWrapper
   ) sse_decode_record_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_sender_wrapper_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_receiver_wrapper(
-      SseDeserializer deserializer) {
+    SseDeserializer deserializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_field0 =
         sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
-            deserializer);
+      deserializer,
+    );
     var var_field1 =
         sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerReceiverWrapper(
-            deserializer);
+      deserializer,
+    );
     return (var_field0, var_field1);
   }
 
@@ -555,7 +666,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_AnyhowException(
-      AnyhowException self, SseSerializer serializer) {
+    AnyhowException self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.message, serializer);
   }
@@ -563,64 +676,83 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void
       sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerReceiverWrapper(
-          ReceiverWrapper self, SseSerializer serializer) {
+    ReceiverWrapper self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-        (self as ReceiverWrapperImpl).frbInternalSseEncode(move: true),
-        serializer);
+      (self as ReceiverWrapperImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
   }
 
   @protected
   void
       sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
-          SenderWrapper self, SseSerializer serializer) {
+    SenderWrapper self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-        (self as SenderWrapperImpl).frbInternalSseEncode(move: true),
-        serializer);
+      (self as SenderWrapperImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
   }
 
   @protected
   void
       sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
-          SenderWrapper self, SseSerializer serializer) {
+    SenderWrapper self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-        (self as SenderWrapperImpl).frbInternalSseEncode(move: false),
-        serializer);
+      (self as SenderWrapperImpl).frbInternalSseEncode(move: false),
+      serializer,
+    );
   }
 
   @protected
   void
       sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerReceiverWrapper(
-          ReceiverWrapper self, SseSerializer serializer) {
+    ReceiverWrapper self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-        (self as ReceiverWrapperImpl).frbInternalSseEncode(move: null),
-        serializer);
+      (self as ReceiverWrapperImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
   }
 
   @protected
   void
       sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
-          SenderWrapper self, SseSerializer serializer) {
+    SenderWrapper self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-        (self as SenderWrapperImpl).frbInternalSseEncode(move: null),
-        serializer);
+      (self as SenderWrapperImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
   }
 
   @protected
   void sse_encode_StreamSink_list_prim_u_8_strict_Sse(
-      RustStreamSink<Uint8List> self, SseSerializer serializer) {
+    RustStreamSink<Uint8List> self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(
-        self.setupAndSerialize(
-            codec: SseCodec(
+      self.setupAndSerialize(
+        codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_u_8_strict,
           decodeErrorData: sse_decode_AnyhowException,
-        )),
-        serializer);
+        ),
+      ),
+      serializer,
+    );
   }
 
   @protected
@@ -631,16 +763,21 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void sse_encode_list_prim_u_8_loose(
-      List<int> self, SseSerializer serializer) {
+    List<int> self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
-    serializer.buffer
-        .putUint8List(self is Uint8List ? self : Uint8List.fromList(self));
+    serializer.buffer.putUint8List(
+      self is Uint8List ? self : Uint8List.fromList(self),
+    );
   }
 
   @protected
   void sse_encode_list_prim_u_8_strict(
-      Uint8List self, SseSerializer serializer) {
+    Uint8List self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);
@@ -659,12 +796,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void
       sse_encode_record_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_sender_wrapper_auto_owned_rust_opaque_flutter_rust_bridgefor_generated_rust_auto_opaque_inner_receiver_wrapper(
-          (SenderWrapper, ReceiverWrapper) self, SseSerializer serializer) {
+    (SenderWrapper, ReceiverWrapper) self,
+    SseSerializer serializer,
+  ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSenderWrapper(
-        self.$1, serializer);
+      self.$1,
+      serializer,
+    );
     sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerReceiverWrapper(
-        self.$2, serializer);
+      self.$2,
+      serializer,
+    );
   }
 
   @protected

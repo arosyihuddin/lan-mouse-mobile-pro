@@ -3,9 +3,16 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Lets the app switch the active keyboard to Lan Mouse while
+         the desktop pointer is here and restore the previous one
+         afterwards. Not grantable at install time; enabled once via
+         adb (pm grant) for this sideloaded app. -->
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
 
     <application
-        android:label="Lan Mouse"
+        android:label="Lan Mouse Pro"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -24,6 +31,30 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service
+            android:name=".LanMouseAccessibilityService"
+            android:exported="true"
+            android:label="Lan Mouse Pro Client Input"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/lan_mouse_accessibility" />
+        </service>
+        <service
+            android:name=".LanMouseImeService"
+            android:exported="true"
+            android:label="Lan Mouse Pro Keyboard"
+            android:permission="android.permission.BIND_INPUT_METHOD">
+            <intent-filter>
+                <action android:name="android.view.InputMethod" />
+            </intent-filter>
+            <meta-data
+                android:name="android.view.im"
+                android:resource="@xml/lan_mouse_method" />
+        </service>
         <meta-data android:name="flutterEmbedding" android:value="2" />
     </application>
     <queries>

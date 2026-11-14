@@ -4,6 +4,7 @@
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
 import '../frb_generated.dart';
+
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `get_certificate`
@@ -12,20 +13,41 @@ Future<(SenderWrapper, ReceiverWrapper)> createU8Channel() =>
     RustLib.instance.api.crateApiLanMouseServerCreateU8Channel();
 
 /// Start a UdbSocket and create connection with given Client
-Stream<Uint8List> connect(
-        {required String basePath,
-        required String ipAddr,
-        required int port,
-        required String targetAddr,
-        required int targetPort,
-        required ReceiverWrapper rx}) =>
+Stream<Uint8List> connect({
+  required String basePath,
+  required String ipAddr,
+  required int port,
+  required String targetAddr,
+  required int targetPort,
+  required ReceiverWrapper rx,
+}) =>
     RustLib.instance.api.crateApiLanMouseServerConnect(
-        basePath: basePath,
-        ipAddr: ipAddr,
-        port: port,
-        targetAddr: targetAddr,
-        targetPort: targetPort,
-        rx: rx);
+      basePath: basePath,
+      ipAddr: ipAddr,
+      port: port,
+      targetAddr: targetAddr,
+      targetPort: targetPort,
+      rx: rx,
+    );
+
+/// Listen for an incoming lan-mouse connection (client mode): the
+/// desktop initiates the DTLS handshake to this device, which then
+/// receives the desktop's input events instead of sending its own.
+/// Mirrors [`connect`]: raw DTLS payload bytes are forwarded to Dart
+/// through `sink`, and frames Dart puts into `rx` (Ack / Pong
+/// replies) are sent back to the desktop. An empty payload from Dart
+/// stops listening entirely; a desktop that goes away simply returns
+/// the loop to waiting for the next connection.
+Stream<Uint8List> listen({
+  required String basePath,
+  required int port,
+  required ReceiverWrapper rx,
+}) =>
+    RustLib.instance.api.crateApiLanMouseServerListen(
+      basePath: basePath,
+      port: port,
+      rx: rx,
+    );
 
 Future<String?> getFingerprint({required String path}) =>
     RustLib.instance.api.crateApiLanMouseServerGetFingerprint(path: path);

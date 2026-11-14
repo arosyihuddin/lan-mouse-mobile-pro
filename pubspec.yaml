@@ -1,13 +1,15 @@
 name: lan_mouse_mobile
 description: "Mobile client for LanMouse"
 publish_to: "none"
-version: 0.0.2+1
+version: 0.1.0+2
 
 environment:
   sdk: ^3.5.4
 
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_localizations:
     sdk: flutter
   buffer: ^1.2.3
   cupertino_icons: ^1.0.8
@@ -26,8 +28,6 @@ dev_dependencies:
   flutter_lints: ^4.0.0
   flutter_launcher_icons: ^0.14.1
   rename_app: ^1.6.1
-  integration_test:
-    sdk: flutter
 
 flutter:
   uses-material-design: true

@@ -128,6 +128,121 @@ pub async fn connect(
     log::info!("Closing connection");
 }
 
+/// Listen for an incoming lan-mouse connection (client mode): the
+/// desktop initiates the DTLS handshake to this device, which then
+/// receives the desktop's input events instead of sending its own.
+/// Mirrors [`connect`]: raw DTLS payload bytes are forwarded to Dart
+/// through `sink`, and frames Dart puts into `rx` (Ack / Pong
+/// replies) are sent back to the desktop. An empty payload from Dart
+/// stops listening entirely; a desktop that goes away simply returns
+/// the loop to waiting for the next connection.
+pub async fn listen(
+    base_path: String,
+    port: u16,
+    rx: ReceiverWrapper,
+    sink: StreamSink<Vec<u8>>,
+) {
+    let mut receiver = rx.0;
+    let mut peek = [0u8; 1];
+
+    'accept: loop {
+        let udp = match UdpSocket::bind(format!("0.0.0.0:{port}")).await {
+            Ok(socket) => Arc::new(socket),
+            Err(err) => {
+                log::error!("Failed to bind UDP {port}: {err}");
+                let _ = sink.add_error(err.to_string());
+                return;
+            }
+        };
+
+        // Wait for a peer without consuming its first datagram: those
+        // bytes are the DTLS ClientHello and belong to the handshake.
+        // An empty payload (or a closed channel) from Dart cancels the
+        // wait and stops listening.
+        let peer = tokio::select! {
+            peeked = udp.peek_from(&mut peek) => match peeked {
+                Ok((_, addr)) => addr,
+                Err(err) => {
+                    log::error!("Failed waiting for a peer: {err}");
+                    let _ = sink.add_error(err.to_string());
+                    return;
+                }
+            },
+            data = receiver.recv() => {
+                match data {
+                    Some(data) if !data.is_empty() => {
+                        log::error!("Ignoring data received before a session started");
+                        continue 'accept;
+                    }
+                    _ => {
+                        log::info!("Stop requested; closing listener");
+                        return;
+                    }
+                }
+            }
+        };
+
+        if let Err(err) = udp.connect(peer).await {
+            log::error!("Failed to connect to peer {peer}: {err}");
+            continue 'accept;
+        }
+
+        let Some(cert) = get_certificate(base_path.clone()) else {
+            let _ = sink.add_error("certificate unavailable".to_string());
+            return;
+        };
+        let config = Config {
+            certificates: vec![cert],
+            extended_master_secret: ExtendedMasterSecretType::Require,
+            ..Default::default()
+        };
+        let dtls = match DTLSConn::new(udp, config, false, None).await {
+            Ok(conn) => conn,
+            Err(err) => {
+                // Stray or malformed datagrams also land here; keep
+                // listening instead of tearing down the Dart stream.
+                log::error!("Failed DTLS handshake with {peer}: {err}");
+                continue 'accept;
+            }
+        };
+        log::info!("Desktop connected from {peer}");
+
+        let mut buf = [0u8; MAX_EVENT_SIZE];
+        'session: loop {
+            tokio::select! {
+                result = dtls.recv(&mut buf) => {
+                    match result {
+                        Ok(_) => {
+                            let _ = sink.add(buf.to_vec());
+                        }
+                        Err(err) => {
+                            log::info!("Desktop session ended: {err}");
+                            let _ = dtls.close().await;
+                            break 'session;
+                        }
+                    }
+                }
+                data = receiver.recv() => {
+                    match data {
+                        Some(data) if !data.is_empty() => {
+                            if let Err(err) = dtls.send(&data).await {
+                                log::error!("Error sending to DTLS: {err}");
+                                let _ = dtls.close().await;
+                                break 'session;
+                            }
+                        }
+                        _ => {
+                            log::info!("Stop requested; closing listener");
+                            let _ = dtls.close().await;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 pub fn get_fingerprint(path: String) -> Option<String> {
     let cert = get_certificate(path);
     if cert.is_none() {

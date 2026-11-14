@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lan_mouse_mobile/app/i18n/strings.dart';
 import 'package:lan_mouse_mobile/app/models/client.dart';
 import 'package:lan_mouse_mobile/app/modules/home/widgets/add_client.dart';
 import 'package:lan_mouse_mobile/app/modules/server/server.dart';
@@ -41,7 +42,7 @@ class _HomeConnectionsState extends State<HomeConnections> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "Connections",
+              tr('connections'),
               style: Theme.of(context).textTheme.titleSmall,
             ),
             InkWell(
@@ -62,7 +63,7 @@ class _HomeConnectionsState extends State<HomeConnections> {
                 children: [
                   const Icon(Icons.add),
                   Text(
-                    'Add',
+                    tr('add'),
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ],
@@ -74,55 +75,38 @@ class _HomeConnectionsState extends State<HomeConnections> {
         Card(
           margin: EdgeInsets.zero,
           child: clients.isEmpty
-              ? const Center(
+              ? Center(
                   child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text("No Clients"),
-                ))
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(tr('noClients')),
+                  ),
+                )
               : ListView.separated(
                   itemCount: clients.length,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (BuildContext context, int index) {
                     Client client = clients[index];
-                    return InkWell(
-                      onTap: () => connectClient(client),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(client.host),
-                                Text(
-                                  "Port: ${client.port}",
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
-                                      ?.copyWith(
-                                        color: Colors.grey,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              storageService.deleteClient(client);
-                              setState(() {
-                                clients.removeAt(index);
-                              });
-                            },
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                          ),
-                        ],
+                    return ListTile(
+                      leading: const Icon(Icons.desktop_windows),
+                      title: Text(client.host),
+                      subtitle: Text("${tr('port')}: ${client.port}"),
+                      trailing: IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        onPressed: () {
+                          storageService.deleteClient(client);
+                          setState(() {
+                            clients.removeAt(index);
+                          });
+                        },
+                        icon: const Icon(Icons.delete, color: Colors.red),
                       ),
+                      onTap: () => connectClient(client),
                     );
                   },
                   separatorBuilder: (context, index) {
-                    return const Divider();
+                    return const Divider(height: 1);
                   },
                 ),
         )

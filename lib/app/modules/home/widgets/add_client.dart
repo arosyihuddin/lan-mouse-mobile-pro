@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lan_mouse_mobile/app/i18n/strings.dart';
 import 'package:lan_mouse_mobile/app/models/client.dart';
 
 class AddClient extends StatefulWidget {
@@ -29,7 +30,7 @@ class _AddClientState extends State<AddClient> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Add Client"),
+      title: Text(tr('addClient')),
       content: Form(
         key: formKey,
         child: Column(
@@ -39,18 +40,18 @@ class _AddClientState extends State<AddClient> {
               controller: hostController,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter valid host';
+                  return tr('enterValidHost');
                 }
                 // Ensure valid address
                 try {
                   InternetAddress(value);
                 } catch (e) {
-                  return "Please enter valid host";
+                  return tr('enterValidHost');
                 }
                 return null;
               },
-              decoration: const InputDecoration(
-                labelText: "Host",
+              decoration: InputDecoration(
+                labelText: tr('host'),
               ),
             ),
             TextFormField(
@@ -59,15 +60,15 @@ class _AddClientState extends State<AddClient> {
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.length != 4) {
-                  return 'Please enter valid port';
+                  return tr('enterValidPort');
                 }
                 return null;
               },
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
               ],
-              decoration: const InputDecoration(
-                labelText: "Port",
+              decoration: InputDecoration(
+                labelText: tr('port'),
               ),
             ),
           ],
@@ -78,11 +79,11 @@ class _AddClientState extends State<AddClient> {
           onPressed: () {
             Navigator.pop(context);
           },
-          child: const Text("Cancel"),
+          child: Text(tr('cancel')),
         ),
         TextButton(
           onPressed: _onAddTap,
-          child: const Text("Add"),
+          child: Text(tr('add')),
         ),
       ],
     );

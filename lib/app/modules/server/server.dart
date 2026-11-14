@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lan_mouse_mobile/app/i18n/strings.dart';
 import 'package:lan_mouse_mobile/app/models/client.dart';
 import 'package:lan_mouse_mobile/app/modules/server/widgets/keyboard_handler.dart';
 import 'package:lan_mouse_mobile/app/modules/server/widgets/mouse_buttons.dart';
@@ -78,7 +79,7 @@ class _ServerState extends State<Server> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Lan Mouse Server"),
+        title: Text("$appName Server"),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4.0),
           child: Text(widget.client.toString()),
