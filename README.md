@@ -4,11 +4,10 @@
 
 > Built on the Lan Mouse protocol by the [lan-mouse](https://github.com/feschber/lan-mouse) project. The desktop side is the upstream `lan-mouse` daemon, unchanged.
 
-<picture>
-    <source media="(prefers-color-scheme: dark)" srcset="/screenshots/dark.png?raw=true" height=600>
-    <source media="(prefers-color-scheme: light)" srcset="/screenshots/light.png?raw=true" height=600>
-    <img alt="Screenshot of Lan Mouse Pro" srcset="/screenshots/dark.png" height=600>
-</picture>
+<p align="center">
+  <img src="screenshots/home.jpg" width="640" alt="Lan Mouse Pro - home screen">
+  <img src="screenshots/client-mode.jpg" width="640" alt="Lan Mouse Pro - controlled from a PC">
+</p>
 
 ## Features
 
