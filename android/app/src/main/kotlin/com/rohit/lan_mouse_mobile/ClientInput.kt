@@ -57,10 +57,16 @@ object ClientInputDispatcher {
     }
 
     /// Restores the keyboard that was active before [switchImeToOurs].
+    /// If nothing was recorded (e.g. the user had already selected
+    /// our IME by hand, or the app restarted mid-session), fall back
+    /// to Gboard when it is enabled, otherwise to the first other
+    /// enabled keyboard — otherwise the phone would stay on the Lan
+    /// Mouse keyboard forever after the pointer leaves.
     fun restorePreviousIme() {
         val ctx = appContext ?: return
-        val prev = previousIme ?: return
+        val prev = previousIme ?: findFallbackIme(ctx)
         previousIme = null
+        if (prev == null || prev == OUR_IME_ID) return
         try {
             Settings.Secure.putString(
                 ctx.contentResolver,
@@ -70,6 +76,22 @@ object ClientInputDispatcher {
         } catch (e: SecurityException) {
             // Permission not granted: nothing was switched either.
         }
+    }
+
+    private fun findFallbackIme(ctx: Context): String? {
+        val enabled = try {
+            Settings.Secure.getString(
+                ctx.contentResolver,
+                Settings.Secure.ENABLED_INPUT_METHODS,
+            )
+        } catch (_: Exception) {
+            null
+        } ?: return null
+        val ids = enabled.split(':')
+            .map { it.substringBefore(';').trim() }
+            .filter { it.isNotEmpty() && it != OUR_IME_ID }
+        return ids.firstOrNull { it.contains("inputmethod.latin") }
+            ?: ids.firstOrNull()
     }
 
     fun requestLeave() {
@@ -194,11 +216,13 @@ object ClientInputDispatcher {
             }
             "leave" -> {
                 service?.onLeave()
+                restorePreviousIme()
                 LanMouseImeService.instance?.resetModifiers()
                 ClipboardSync.pushCurrentClipboard()
             }
             "sessionEnded" -> {
                 service?.onSessionEnded()
+                restorePreviousIme()
                 LanMouseImeService.instance?.resetModifiers()
             }
             "acquireLocks" -> acquireLocks()

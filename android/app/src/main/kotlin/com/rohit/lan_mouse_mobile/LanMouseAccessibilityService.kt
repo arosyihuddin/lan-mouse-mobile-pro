@@ -2,7 +2,9 @@ package com.rohit.lan_mouse_mobile
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
+import android.content.res.Configuration
 import android.graphics.Path
+import android.util.DisplayMetrics
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Handler
@@ -122,12 +124,58 @@ class LanMouseAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         instance = this
-        val metrics = resources.displayMetrics
-        screenW = metrics.widthPixels
-        screenH = metrics.heightPixels
+        windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+        refreshScreenSize()
         cursorX = screenW / 2f
         cursorY = screenH / 2f
-        windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // Rotation: re-read the display size, otherwise the cursor
+        // stays clamped to the old orientation's bounds (e.g. in
+        // portrait it could never reach the bottom because screenH
+        // was still the landscape height).
+        refreshScreenSize()
+    }
+
+    /// Re-reads the current display size and clamps the cursor into
+    /// it. Called on connect, on rotation, on every enter, and on
+    /// every motion frame, so a rotation mid-session is picked up
+    /// even if the configuration callback is missed.
+    private fun refreshScreenSize() {
+        val wm = windowManager
+        var w = 0
+        var h = 0
+        if (wm != null) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    val bounds = wm.currentWindowMetrics.bounds
+                    w = bounds.width()
+                    h = bounds.height()
+                } else {
+                    @Suppress("DEPRECATION")
+                    val metrics = DisplayMetrics()
+                    @Suppress("DEPRECATION")
+                    wm.defaultDisplay.getRealMetrics(metrics)
+                    w = metrics.widthPixels
+                    h = metrics.heightPixels
+                }
+            } catch (_: Exception) {
+                // Fall through to displayMetrics below.
+            }
+        }
+        if (w <= 0 || h <= 0) {
+            val metrics = resources.displayMetrics
+            w = metrics.widthPixels
+            h = metrics.heightPixels
+        }
+        if (w > 0 && h > 0) {
+            screenW = w
+            screenH = h
+            cursorX = cursorX.coerceIn(0f, (screenW - 1).toFloat())
+            cursorY = cursorY.coerceIn(0f, (screenH - 1).toFloat())
+        }
     }
 
     override fun onDestroy() {
@@ -154,6 +202,7 @@ class LanMouseAccessibilityService : AccessibilityService() {
         // desktop repeats Enter until our Ack lands) must not
         // re-snap the cursor or reset the exit tracking.
         if (cursorShown) return
+        refreshScreenSize()
         endDrag()
         scrollAccumXPx = 0.0
         scrollAccumYPx = 0.0
@@ -197,6 +246,7 @@ class LanMouseAccessibilityService : AccessibilityService() {
 
     private fun applyPendingMotion() {
         frameCallbackPosted = false
+        refreshScreenSize()
         val dx = pendingDx
         val dy = pendingDy
         pendingDx = 0.0
