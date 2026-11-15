@@ -150,7 +150,18 @@ class AndroidEnvironment {
     final toolTempDir =
         Platform.environment['CARGOKIT_TOOL_TEMP_DIR'] ?? targetTempDir;
 
+    // Cargo finds `rustc` via PATH. The Gradle daemon's PATH can put
+    // /usr/bin first, where Arch Linux ships a system rustc (1.99.1)
+    // whose sysroot (/usr) has no Android std targets, causing
+    // `error[E0463]: can't find crate for 'core'/'std'` for
+    // armv7-linux-androideabi. Put ~/.cargo/bin (rustup shims) first so
+    // cargo uses the rustup stable toolchain, which has the Android
+    // targets installed.
+    final home = Platform.environment['HOME'] ?? '';
+    final cargoBin = path.join(home, '.cargo', 'bin');
+    final parentPath = Platform.environment['PATH'] ?? '';
     return {
+      'PATH': '$cargoBin:$parentPath',
       arKey: arValue,
       ccKey: ccValue,
       cfFlagsKey: cFlagsValue,
